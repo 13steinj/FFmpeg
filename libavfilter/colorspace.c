@@ -165,6 +165,27 @@ void ff_fill_rgb2yuv_table(const struct LumaCoefficients *coeffs,
     rgb2yuv[2][2] = rscale * coeffs->cb;
 }
 
+int ff_get_range_off(int *off, int *y_rng, int *uv_rng,
+                     enum AVColorRange rng, int depth)
+{
+    switch (rng) {
+    case AVCOL_RANGE_UNSPECIFIED:
+    case AVCOL_RANGE_MPEG:
+        *off = 16 << (depth - 8);
+        *y_rng = 219 << (depth - 8);
+        *uv_rng = 224 << (depth - 8);
+        break;
+    case AVCOL_RANGE_JPEG:
+        *off = 0;
+        *y_rng = *uv_rng = (256 << (depth - 8)) - 1;
+        break;
+    default:
+        return AVERROR(EINVAL);
+    }
+
+    return 0;
+}
+
 double ff_determine_signal_peak(AVFrame *in)
 {
     AVFrameSideData *sd = av_frame_get_side_data(in, AV_FRAME_DATA_CONTENT_LIGHT_LEVEL);
