@@ -77,6 +77,12 @@ static const enum AVPixelFormat pix_fmts[] = {
     AV_PIX_FMT_NONE,
 };
 
+typedef struct ThreadData {
+    AVFrame *in, *out;
+    const AVPixFmtDescriptor *desc, *odesc;
+    double peak;
+} ThreadData;
+
 static int query_formats(AVFilterContext *ctx)
 {
     return ff_set_common_formats(ctx, ff_make_format_list(pix_fmts));
@@ -191,11 +197,6 @@ static void tonemap(TonemapContext *s, AVFrame *out, const AVFrame *in,
     *b_out *= sig / sig_orig;
 }
 
-typedef struct ThreadData {
-    AVFrame *in, *out;
-    const AVPixFmtDescriptor *desc;
-    double peak;
-} ThreadData;
 
 static int tonemap_slice(AVFilterContext *ctx, void *arg, int jobnr, int nb_jobs)
 {
